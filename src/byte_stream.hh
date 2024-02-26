@@ -1,9 +1,11 @@
 #pragma once
 
 #include <cstdint>
+#include <queue>
 #include <string>
 #include <string_view>
 
+// 类的前向声明，解决ByteStream中对Reader/Writer类的依赖
 class Reader;
 class Writer;
 
@@ -14,6 +16,7 @@ public:
 
   // Helper functions (provided) to access the ByteStream's Reader and Writer interfaces
   Reader& reader();
+  // 函数重载，带const的接口不可以修改 ByteStream内部的成员变量，该方法内部的this指针同样被const修饰
   const Reader& reader() const;
   Writer& writer();
   const Writer& writer() const;
@@ -23,7 +26,14 @@ public:
 
 protected:
   // Please add any additional state to the ByteStream here, and not to the Writer and Reader interfaces.
-  uint64_t capacity_;
+  // "{}"为C++中的默认初始化
+  std::queue<std::string> bytes_ {};
+  std::string_view view_wnd_ {};
+  uint64_t capacity_ {};
+  uint64_t num_bytes_pushed_ {};
+  uint64_t num_bytes_popped_ {};
+  uint64_t num_bytes_buffered_ {};
+  bool is_closed_ {};
   bool error_ {};
 };
 
